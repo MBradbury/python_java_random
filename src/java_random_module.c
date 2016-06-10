@@ -105,8 +105,12 @@ static PyMethodDef JavaRandom_methods[] = {
 };
 
 static PyTypeObject JavaRandomType = {
+#if PY_MAJOR_VERSION >= 3
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
+#endif
     "java_random.JavaRandom",             /*tp_name*/
     sizeof(JavaRandomObject), /*tp_basicsize*/
     0,                         /*tp_itemsize*/
@@ -151,11 +155,25 @@ static PyMethodDef java_random_methods[] = {
     {NULL}  /* Sentinel */
 };
 
-#ifndef PyMODINIT_FUNC  /* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
+#if PY_MAJOR_VERSION >= 3
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "java_random",     /* m_name */
+    "Provides a python interface to Java's random number generator.",  /* m_doc */
+    -1,                  /* m_size */
+    java_random_methods,    /* m_methods */
+    NULL,                /* m_reload */
+    NULL,                /* m_traverse */
+    NULL,                /* m_clear */
+    NULL,                /* m_free */
+};
 #endif
-PyMODINIT_FUNC
-initjava_random(void) 
+
+#ifndef PyMODINIT_FUNC  /* declarations for DLL import/export */
+#   define PyMODINIT_FUNC void
+#endif
+
+static PyObject * java_random_module_init(void)
 {
     PyObject* m;
 
@@ -163,9 +181,28 @@ initjava_random(void)
     if (PyType_Ready(&JavaRandomType) < 0)
         return;
 
+#if PY_MAJOR_VERSION >= 3
+    m = PyModule_Create(&moduledef);
+#else
     m = Py_InitModule3("java_random", java_random_methods,
                        "Provides a python interface to Java's random number generator.");
+#endif
 
     Py_INCREF(&JavaRandomType);
     PyModule_AddObject(m, "JavaRandom", (PyObject *)&JavaRandomType);
+
+    return m;
 }
+
+
+#if PY_MAJOR_VERSION < 3
+    PyMODINIT_FUNC initjava_random(void)
+    {
+        java_random_module_init();
+    }
+#else
+    PyMODINIT_FUNC PyInit_java_random(void)
+    {
+        return java_random_module_init();
+    }
+#endif
