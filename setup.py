@@ -6,5 +6,6 @@ setup(name="java_random", version="1.0.1",
       url="https://github.com/MBradbury/python_java_random",
       ext_modules=[Extension("java_random", ["src/java_random_module.c", "src/java_random.c"])],
       classifiers=["Programming Language :: Python :: 2",
-                   "Programming Language :: Python :: 3"]
+                   "Programming Language :: Python :: 3",
+                   "Programming Language :: Python :: Implementation :: CPython"]
 )
